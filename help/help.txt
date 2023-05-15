@@ -1,0 +1,46 @@
+
+На ВМ (на хостах) :
+sudo apt update && sudo apt install -y postgresql-client
+
+
+Создание кластера :
+
+- В консоли управления выберите каталог, в котором нужно создать кластер БД.
+- Выберите сервис Managed Service for PostgreSQL.
+- Нажмите кнопку Создать кластер.
+- Задайте параметры кластера и нажмите кнопку Создать кластер. Процесс подробно рассмотрен в разделе Создание PostgreSQL-кластера.
+- Дождитесь, когда кластер будет готов к работе: его статус на панели Managed Service for PostgreSQL сменится на Running, а состояние — на Alive. Это может занять некоторое время.
+
+CLI :
+yc vpc subnet list
+yc managed-postgresql cluster create --help
+
+yc managed-postgresql cluster create \
+ --name mypgcluster \
+ --environment production   \
+ --network-name default \
+ --resource-preset s2.micro \
+ --host assign-public-ip=true,zone-id=ru-central1-a,subnet-id=e9bnag83vhju1ee2q5ra \
+ --host assign-public-ip=true,zone-id=ru-central1-c,subnet-id=b0ckotjkr9d8c70rg7jf \
+ --disk-type network-ssd \
+ --disk-size 20 \
+ --user name=user,password=user119128 \
+ --database name=mydb,owner=user \
+
++Доступ из консоли управления - для кластера
+
+Подключаемся к кластеру
+
+mkdir --parents ~/.postgresql && \
+wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" \
+    --output-document ~/.postgresql/root.crt && \
+chmod 0600 ~/.postgresql/root.crt
+
+psql "host=rc1a-qj56gd5t1gam9u9c.mdb.yandexcloud.net,rc1c-jnl556d3c17wsr0y.mdb.yandexcloud.net \
+      port=6432 \
+      sslmode=verify-full \
+      dbname=mydb \
+      user=user \
+      target_session_attrs=read-write"
+      
+

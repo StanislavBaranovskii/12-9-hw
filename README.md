@@ -1,4 +1,4 @@
-# Домашнее задание к занятию 12.8. «`Базы данных в облаке`» - `Барановский Станислав`
+# Домашнее задание к занятию 12.9. «`Базы данных в облаке`» - `Барановский Станислав`
 
 ### Инструкция по выполнению домашнего задания
 
@@ -39,44 +39,84 @@
 
 * Нажмите кнопку «Создать кластер» и дождитесь окончания процесса создания, статус кластера = RUNNING. Кластер создаётся от 5 до 10 минут.
 
+### Создаем кластер из CLI
+
+```bash
+yc vpc subnet list
+yc managed-postgresql cluster create --help
+
+yc managed-postgresql cluster create \
+ --name mypgcluster \
+ --environment production   \
+ --network-name default \
+ --resource-preset s2.micro \
+ --host assign-public-ip=true,zone-id=ru-central1-a,subnet-id=e9bnag83vhju1ee2q5ra \
+ --host assign-public-ip=true,zone-id=ru-central1-c,subnet-id=b0ckotjkr9d8c70rg7jf \
+ --disk-type network-ssd \
+ --disk-size 20 \
+ --user name=user,password=user119128 \
+ --database name=mydb,owner=user \
+
+```
+
 #### Подключение к мастеру и реплике 
 
 * Используйте инструкцию по подключению к кластеру, доступную на вкладке «Обзор»: cкачайте SSL-сертификат и подключитесь к кластеру с помощью утилиты psql, указав hostname всех узлов и атрибут ```target_session_attrs=read-write```.
 
-* Проверьте, что подключение прошло к master-узлу.
+### Подключение к кластеру
+
+```bash
+mkdir --parents ~/.postgresql && \
+wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" \
+    --output-document ~/.postgresql/root.crt && \
+sudo chmod 0600 ~/.postgresql/root.crt
+
+psql "host=rc1a-qj56gd5t1gam9u9c.mdb.yandexcloud.net,rc1c-jnl556d3c17wsr0y.mdb.yandexcloud.net \
+      port=6432 \
+      sslmode=verify-full \
+      dbname=mydb \
+      user=user \
+      target_session_attrs=read-write"
 ```
+
+* Проверьте, что подключение прошло к master-узлу.
+```sql
 select case when pg_is_in_recovery() then 'REPLICA' else 'MASTER' end;
 ```
 * Посмотрите количество подключенных реплик:
-```
+```sql
 select count(*) from pg_stat_replication;
 ```
+
+![Скриншот подключения к кластеру](https://github.com/StanislavBaranovskii/12-9-hw/blob/main/img/12-9-1-1.png "Скриншот подключения к кластеру")
 
 ### Проверьте работоспособность репликации в кластере
 
 * Создайте таблицу и вставьте одну-две строки.
+```sql
+create table test_table(text varchar);
 ```
-CREATE TABLE test_table(text varchar);
-```
-```
+```sql
 insert into test_table values('Строка 1');
 ```
+
+![Скриншот создания таблицы](https://github.com/StanislavBaranovskii/12-9-hw/blob/main/img/12-9-1-2.png "Скриншот создания тоблицы")
 
 * Выйдите из psql командой ```\q```.
 
 * Теперь подключитесь к узлу-реплике. Для этого из команды подключения удалите атрибут ```target_session_attrs```  и в параметре атрибут ```host``` передайте только имя хоста-реплики. Роли хостов можно посмотреть на соответствующей вкладке UI консоли.
 
 * Проверьте, что подключение прошло к узлу-реплике.
-```
+```sql
 select case when pg_is_in_recovery() then 'REPLICA' else 'MASTER' end;
 ```
 * Проверьте состояние репликации
-```
+```sql
 select status from pg_stat_wal_receiver;
 ```
 
 * Для проверки, что механизм репликации данных работает между зонами доступности облака, выполните запрос к таблице, созданной на предыдущем шаге:
-```
+```sql
 select * from test_table;
 ```
 
