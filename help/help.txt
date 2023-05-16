@@ -3,7 +3,7 @@
 sudo apt update && sudo apt install -y postgresql-client
 
 
-Создание кластера :
+Создание кластера PSQL :
 
 - В консоли управления выберите каталог, в котором нужно создать кластер БД.
 - Выберите сервис Managed Service for PostgreSQL.
@@ -29,7 +29,7 @@ yc managed-postgresql cluster create \
 
 +Доступ из консоли управления - для кластера
 
-Подключаемся к кластеру
+Подключаемся к кластеру PSQL :
 
 mkdir --parents ~/.postgresql && \
 wget "https://storage.yandexcloud.net/cloud-certs/CA.pem" \
@@ -43,4 +43,8 @@ psql "host=rc1a-qj56gd5t1gam9u9c.mdb.yandexcloud.net,rc1c-jnl556d3c17wsr0y.mdb.y
       user=user \
       target_session_attrs=read-write"
       
+Останавливаем и удаляем кластер PSQL :
 
+yc managed-postgresql cluster stop c9quson13kg0s802k8uj
+
+yc managed-postgresql cluster delete c9quson13kg0s802k8uj

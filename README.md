@@ -110,6 +110,7 @@ insert into test_table values('Строка 1');
 ```sql
 select case when pg_is_in_recovery() then 'REPLICA' else 'MASTER' end;
 ```
+
 * Проверьте состояние репликации
 ```sql
 select status from pg_stat_wal_receiver;
@@ -125,6 +126,16 @@ select * from test_table;
 *1) Созданной базы данных;*
 *2) Результата вывода команды на реплике ```select * from test_table;```.*
 
+![Скриншот выполнения команд](https://github.com/StanislavBaranovskii/12-9-hw/blob/main/img/12-9-1-3.png "Скриншот выполнения команд")
+
+### Останов и удаление кластера из CLI
+
+```bash
+yc managed-postgresql cluster stop c9quson13kg0s802k8uj
+
+yc managed-postgresql cluster delete c9quson13kg0s802k8uj
+
+```
 
 ---
 ## Задание 2*
